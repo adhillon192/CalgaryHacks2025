@@ -2,9 +2,13 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import ImageUpload from "./components/ImageUpload.jsx";
+import PredictionResult from "./components/PredictionResult.jsx";
 
 function App() {
-  const [count, setCount] = useState(0)
+
+  const [prediction, setPrediction] = useState(null);
+  /* const [count, setCount] = useState(0)
 
   return (
     <>
@@ -30,6 +34,17 @@ function App() {
       </p>
     </>
   )
-}
-
-export default App
+    */
+  
+  
+      return (
+          <div className="max-w-xl mx-auto mt-10">
+              <h1 className="text-2xl font-bold text-center">Image Classifier</h1>
+              <ImageUpload onPrediction={setPrediction} />
+              <PredictionResult result={prediction} />
+          </div>
+      );
+  }
+  
+  export default App;
+  

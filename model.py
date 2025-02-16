@@ -5,13 +5,12 @@ import requests
 import os
 import base64
 from PIL import Image
-
+from dotenv import load_dotenv
 from flask_cors import CORS
 
-
+load_dotenv()
 app = Flask(__name__)
-client = OpenAI( api_key="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")
-openai.api_key = "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"
+client = OpenAI( api_key=os.getenv("OPENAI_API_KEY"))
 
 CORS(app)
 
@@ -29,11 +28,21 @@ def identify_animal():
     try:
         # Use OpenAI's Vision API
         response = client.chat.completions.create(
-            model="gpt-4-turbo",
+            model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are an expert in identifying animals."},
-                {"role": "user", "content": "In one word, identify the animal in this image. Image URL: data:image/jpeg;base64," + image_base64}
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "In just one word, tell me what species of animal is in this image?"},
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/jpeg;base64,{image_base64}",
+                    },
+                },
             ],
+        }
+    ],
             max_tokens=300
         )
 

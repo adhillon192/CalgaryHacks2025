@@ -48,9 +48,9 @@ def identify_animal():
 
         # Extract the response
         animal_name = response.choices[0].message.content
-        animal_stat(animal_name)
-
-        return jsonify({"animal": animal_name})
+        
+            
+        return jsonify({"animal": animal_name, "stat": animal_stat(animal_name)})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -64,7 +64,7 @@ def animal_stat(animal_name):
         )
         statistics = response.choices[0].message.content
         print(statistics)
-        return jsonify({"stats": statistics})
+        return statistics
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500   

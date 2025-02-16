@@ -48,11 +48,26 @@ def identify_animal():
 
         # Extract the response
         animal_name = response.choices[0].message.content
+        animal_stat(animal_name)
 
         return jsonify({"animal": animal_name})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+def animal_stat(animal_name):
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": f"for the animal {animal_name}, just list the species statistics. the statistics I am looking for include scientific name, conservation status, population, and how climate change is affecting their species"}],
+            max_tokens=300        
+        )
+        statistics = response.choices[0].message.content
+        print(statistics)
+        return jsonify({"stats": statistics})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500   
 
 if __name__ == '__main__':
     app.run(debug=True)

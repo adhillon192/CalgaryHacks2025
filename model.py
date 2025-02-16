@@ -32,7 +32,7 @@ def identify_animal():
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are an expert in identifying animals."},
-                {"role": "user", "content": "In one word, identify the animal in this image. Image URL: data:image/jpeg;base64," + image_base64}
+                {"role": "user", "content": "In exactly one word, identify the animal in this image. Image URL: data:image/jpeg;base64," + image_base64}
             ],
             max_tokens=300
         )

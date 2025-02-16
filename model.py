@@ -1,78 +1,45 @@
-import matplotlib.pyplot as plt
-import numpy as np
-import PIL
-import tensorflow as tf
-import tensorflow_datasets as tfds
+from flask import Flask, request, jsonify
+import openai
+import requests
+import os
+from PIL import Image
 
-from tensorflow import keras
-from tensorflow.keras import layers
-from tensorflow.keras import models
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.applications import MobileNetV2
-import kagglehub
+app = Flask(__name__)
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
-# Download latest version
-path = kagglehub.dataset_download("anshulmehtakaggl/wildlife-animals-images")
+@app.route("api/identify", methods=["POST"])
+def identify_animal():
+    if 'image' not in request.files:
+        return jsonify({"error": "No image uploaded"}), 400
+    
+    image = request.files['image']
+    
+    # Convert image to bytes
+    image_bytes = image.read()
 
+    try:
+        # Use OpenAI's Vision API
+        response = openai.ChatCompletion.create(
+            model="gpt-4-vision-preview",
+            messages=[
+                {"role": "system", "content": "You are an expert in identifying animals."},
+                {"role": "user", "content": [
+                    {"type": "text", "text": "Identify the animal in this image."},
+                    {"type": "image", "image": image_bytes}
+                ]}
+            ],
+            max_tokens=50
+        )
 
-# print("Path to dataset files:", path)
+        # Extract the response
+        animal_name = response["choices"][0]["message"]["content"]
 
-IMG_SIZE = (224,224)
-BATCH_SIZE = 32
+        return jsonify({"animal": animal_name})
 
-data = ImageDataGenerator(
-    rescale=1./255,
-    # validation_split=0.2,
-    rotation_range=20,  # Data augmentation
-    width_shift_range=0.2,
-    height_shift_range=0.2,
-    shear_range=0.2,
-    zoom_range=0.2,
-    horizontal_flip=True,
-    fill_mode='nearest'
-)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-
-# Load training data
-train_generator = data.flow_from_directory(
-    path,
-    target_size=IMG_SIZE,
-    batch_size=BATCH_SIZE,
-    class_mode='categorical',
-    subset='training'
-)
-
-# # Load validation data
-# validation_generator = data.flow_from_directory(
-#     path,
-#     target_size= IMG_SIZE,
-#     batch_size= BATCH_SIZE,
-#     class_mode='categorical',
-#     subset='validation'
-# )
-
-# Check class labels
-print(train_generator.class_indices)
-
-base_model = MobileNetV2(
-    input_shape = (224, 224, 3),
-    weights="imagenet"
-)
-
-model = models.sequential(
-    base_model
-)
-
-
-# #Preprocessing the images to a fixed size
-# def preprocessImages(picture):
-#     image = tf.image.resize(picture["image"], IMG_SIZE)/255.0
-#     label = picture["label"]
-#     return image, label
-
-# #Applying the preprocessing 
-# dataset = dataset.map(preprocessImages).batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
-
-# print(dataset)
+if __name__ == '__main__':
+    app.run(debug=True)

@@ -6,12 +6,16 @@ import os
 import base64
 from PIL import Image
 
+from flask_cors import CORS
+
+
 app = Flask(__name__)
 client = OpenAI( api_key="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")
 openai.api_key = "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"
 
+CORS(app)
 
-@app.route("/identify-animal", methods=["POST"])
+@app.route("/api/identify", methods=["POST"])
 def identify_animal():
     if 'image' not in request.files:
         return jsonify({"error": "No image uploaded"}), 400

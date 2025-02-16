@@ -32,22 +32,44 @@ const ImageUpload = ({ onPrediction }) => {
     };
 
     const handleUpload = async () => {
-        if (!image) return;
+    if (!image) {
+        console.log("❌ No image selected!");
+        return;
+    }
 
-       /* const formData = new FormData();
-        formData.append("file", image);
+    const formData = new FormData();
+    formData.append("image", image);
 
-        try {
-            const response = await fetch("http://127.0.0.1:5000/predict", {
-                method: "POST",
-                body: formData,
-            });
-            const data = await response.json();
-            onPrediction(data);
-        } catch (error) {
-            console.error("Error:", error);
+    // ✅ Debugging FormData
+    console.log("✅ FormData contents:");
+    for (let pair of formData.entries()) {
+        console.log(pair[0], pair[1]); // Should log: "file", FileObject
+    }
+
+    try {
+        console.log("🚀 Sending request to Flask...");
+        const response = await fetch("http://127.0.0.1:5000/api/identify", {
+            method: "POST",
+            body: formData,
+        });
+
+        console.log("📩 Response received:", response);
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error("❌ Server Error:", errorData);
+            throw new Error(errorData.error || "Upload failed");
         }
-            */
+
+        const data = await response.json();
+        console.log("✅ Server Response:", data);
+        onPrediction(data);
+    } catch (error) {
+        console.error("❌ Error:", error);
+    }
+
+
+            /*
         
             // Simulate API response
             setTimeout(() => {
@@ -57,6 +79,7 @@ const ImageUpload = ({ onPrediction }) => {
                 };
                 onPrediction(mockResponse);
             }, 1000); // Simulates a 1-second delay
+            */
     };
 
     return (

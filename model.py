@@ -1,15 +1,17 @@
 from flask import Flask, request, jsonify
 import openai
+from openai import OpenAI
 import requests
 import os
+import base64
 from PIL import Image
 
 app = Flask(__name__)
+client = OpenAI( api_key="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")
+openai.api_key = "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"
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
 
-
-@app.route("api/identify", methods=["POST"])
+@app.route("/identify-animal", methods=["POST"])
 def identify_animal():
     if 'image' not in request.files:
         return jsonify({"error": "No image uploaded"}), 400
@@ -17,24 +19,22 @@ def identify_animal():
     image = request.files['image']
     
     # Convert image to bytes
-    image_bytes = image.read()
+    image_base64 = base64.b64encode(image.read()).decode('utf-8')
+    # image_bytes = image.read()
 
     try:
         # Use OpenAI's Vision API
-        response = openai.ChatCompletion.create(
-            model="gpt-4-vision-preview",
+        response = client.chat.completions.create(
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are an expert in identifying animals."},
-                {"role": "user", "content": [
-                    {"type": "text", "text": "Identify the animal in this image."},
-                    {"type": "image", "image": image_bytes}
-                ]}
+                {"role": "user", "content": "In one word, identify the animal in this image. Image URL: data:image/jpeg;base64," + image_base64}
             ],
-            max_tokens=50
+            max_tokens=300
         )
 
         # Extract the response
-        animal_name = response["choices"][0]["message"]["content"]
+        animal_name = response.choices[0].message.content
 
         return jsonify({"animal": animal_name})
 

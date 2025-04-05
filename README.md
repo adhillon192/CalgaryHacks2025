@@ -1,4 +1,3 @@
----
 
 ### **📌 Devpost Submission**
 #### **WildVision - AI-Powered Wildlife Identification for Conservation**

@@ -1,0 +1,18 @@
+
+.env
+
+# Node.js
+node_modules/
+
+# Python
+__pycache__/
+venv/
+.env
+
+# VSCode
+.vscode/
+
+# Build
+build/
+dist/
+.next/
